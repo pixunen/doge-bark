@@ -1,4 +1,11 @@
 ﻿using doge_bark;
+using System.Runtime.InteropServices;
+
+[DllImport("kernel32.dll", SetLastError = true)]
+static extern uint SetThreadExecutionState(uint esFlags);
+
+const uint ES_CONTINUOUS = 0x80000000;
+const uint ES_SYSTEM_REQUIRED = 0x00000001;
 
 // Starting animation - skip with any key
 Console.Write("Welcome to doge-bark");
@@ -19,6 +26,9 @@ for (int i = 0; i < 10; i++)
     }
 }
 Console.WriteLine();
+
+// Prevent the computer from going to sleep
+SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED);
 
 // Options for the user
 int threshold = 3000;
@@ -92,3 +102,6 @@ for (int i = 0; i < 10; i++)
         Thread.Sleep(300);
     }
 }
+
+// Allow the computer to go to sleep again
+SetThreadExecutionState(ES_CONTINUOUS);
