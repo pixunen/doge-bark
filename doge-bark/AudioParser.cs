@@ -1,9 +1,16 @@
 ﻿using NAudio.Wave;
+using System.Runtime.InteropServices;
 
 namespace doge_bark
 {
     public class AudioParser
     {
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern uint SetThreadExecutionState(uint esFlags);
+
+        const uint ES_CONTINUOUS = 0x80000000;
+        const uint ES_SYSTEM_REQUIRED = 0x00000001;
+
         private readonly int threshold;
         private readonly int clipLength;
         private readonly string outputPath;
@@ -46,6 +53,9 @@ namespace doge_bark
 
             waveIn.StopRecording();
             waveIn.Dispose();
+
+            // Allow the computer to go to sleep again
+            SetThreadExecutionState(ES_CONTINUOUS);
         }
 
         /// <summary>
@@ -55,6 +65,9 @@ namespace doge_bark
         /// <param name="e"></param>
         private void WaveInDataAvailable(object sender, WaveInEventArgs e)
         {
+            // Prevent the computer from going to sleep
+            SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED);
+
             // check if recording should stop
             if (stopRecording)
             {
